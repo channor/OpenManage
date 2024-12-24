@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Settings\AppSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -26,6 +27,7 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('app')
+            ->brandName(fn () => app(AppSettings::class)->company_name)
             ->login()
             ->colors([
                 'primary' => Color::Amber,
