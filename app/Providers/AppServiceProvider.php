@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Settings\AppSettings;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $settings = app(AppSettings::class);
+
+        // This actually sets the 'app.timezone' config for the current request/CLI run.
+        config(['app.timezone' => $settings->default_timezone]);
+
+        // This tells PHP itself to use the new timezone.
+        date_default_timezone_set($settings->default_timezone);
     }
 }
