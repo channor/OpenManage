@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Settings\AppSettings;
+use BezhanSalleh\FilamentShield\FilamentShield;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
 
         // This tells PHP itself to use the new timezone.
         date_default_timezone_set($settings->default_timezone);
+
+        FilamentShield::prohibitDestructiveCommands($this->app->isProduction());
     }
 }
