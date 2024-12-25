@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages;
+namespace App\Filament\App\Pages;
 
 use App\Settings\AppSettings;
 use Filament\Forms;
@@ -15,7 +15,7 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
     protected static ?string $navigationLabel = 'App Settings';
     protected static ?string $slug = 'app-settings';
     protected static ?string $navigationGroup = 'System';
-    protected static string $view = 'filament.pages.manage-app-settings';
+    protected static string $view = 'filament.app.pages.manage-app-settings';
 
     // Instead of storing the entire AppSettings object, store each field individually.
     public string $company_name;
