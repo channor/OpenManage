@@ -207,6 +207,7 @@ class AbsenceResource extends Resource
                             $query->whereDate('start_date', '<=', $date)
                             );
                     }),
+                Tables\Filters\TrashedFilter::make('Trashed')->label('Trashed')->translateLabel()
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -215,6 +216,7 @@ class AbsenceResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
