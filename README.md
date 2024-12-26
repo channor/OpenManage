@@ -18,6 +18,7 @@
 - [ ] Absence tracking/management.
 - [ ] Welcome email new users.
 - [ ] Create new user option with roles selection when creating person.
+- [ ] Add logic for absences where type `has_hours = true`.
 
 ---
 

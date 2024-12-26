@@ -2,12 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\App\Resources\AbsenceTypeResource\Pages\CreateAbsenceType;
+use App\Filament\App\Resources\AbsenceTypeResource\Pages\ListAbsenceTypes;
 use App\Settings\AppSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -47,7 +50,8 @@ class AppPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make('System')->collapsed()
+                NavigationGroup::make()->label('Absence & Holidays')->icon('heroicon-o-arrow-right-start-on-rectangle'),
+                NavigationGroup::make('System')->collapsed(),
             ])
             ->middleware([
                 EncryptCookies::class,
