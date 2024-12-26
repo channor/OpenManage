@@ -3,6 +3,7 @@
 namespace App\Filament\App\Pages;
 
 use App\Settings\AppSettings;
+use Carbon\CarbonTimeZone;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -37,6 +38,9 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
      */
     public function form(Forms\Form $form): Forms\Form
     {
+        $timezones = \DateTimeZone::listIdentifiers();
+        $timezoneOptions = array_combine($timezones, $timezones);
+
         return $form->schema([
             Forms\Components\TextInput::make('company_name')
                 ->label('Company Name')
@@ -47,9 +51,11 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
                 ->directory('logos')
                 ->image(),
 
-            Forms\Components\TextInput::make('default_timezone')
+            Forms\Components\Select::make('default_timezone')
                 ->label('Default Timezone')
-                ->default('UTC'),
+                ->options($timezoneOptions)
+                ->searchable()
+                ->default('Europe/Oslo'),
         ]);
     }
 

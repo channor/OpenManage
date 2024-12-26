@@ -45,7 +45,8 @@ class PersonResource extends Resource
                     ->default(PersonType::Employee->value)
                     ->required(),
                 Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name'),
+                    ->relationship('user', 'name')
+                    ->searchable(),
             ]);
     }
 
