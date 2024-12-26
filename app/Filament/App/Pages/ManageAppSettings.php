@@ -12,7 +12,7 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationLabel = 'App Settings';
     protected static ?string $slug = 'app-settings';
     protected static ?string $navigationGroup = 'System';

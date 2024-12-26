@@ -12,6 +12,15 @@
 
 ---
 
+## PLANNED / TODO
+
+- [ ] Add inactivity at date column and logic to users.
+- [ ] Absence tracking/management.
+- [ ] Welcome email new users.
+- [ ] Create new user option with roles selection when creating person.
+
+---
+
 ## Contributing
 
 OpenManage is developed by [@channor](https://github.com/channor) primarily for personal/company needs, but we welcome any and all contributions:
