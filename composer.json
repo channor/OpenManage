@@ -1,5 +1,5 @@
 {
-    "name": "OpenManage",
+    "name": "channor/openmanage",
     "type": "project",
     "description": "OpenManage is a simple app for companies perform management tasks such as employee absence. It is built rapid with Laravel and Filament.",
     "keywords": ["openmanage", "management", "absence", "employee","laravel", "framework"],
