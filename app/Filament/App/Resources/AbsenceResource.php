@@ -28,7 +28,7 @@ class AbsenceResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return __("Absence list");
+        return __("Manage absences");
     }
 
     public static function form(Form $form): Form
@@ -236,5 +236,10 @@ class AbsenceResource extends Resource
             'view' => Pages\ViewAbsence::route('/{record}'),
             'edit' => Pages\EditAbsence::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
     }
 }

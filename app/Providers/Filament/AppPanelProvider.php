@@ -46,8 +46,6 @@ class AppPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\\Filament\\App\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->navigationGroups([
                 NavigationGroup::make()->label('Absence & Holidays')->icon('heroicon-o-arrow-right-start-on-rectangle'),
