@@ -22,6 +22,18 @@
 
 ---
 
+## Installation
+
+1. Clone the repo.
+2. `composer install`
+3. `cp .env.example .env`
+4. Set app key `php artisan key:generate`
+5. Edit database settings in .env.
+6. `php artisan migrate`
+7. Create your first user with `php artisan make:filament-user`
+
+---
+
 ## Contributing
 
 OpenManage is developed by [@channor](https://github.com/channor) primarily for personal/company needs, but we welcome any and all contributions:
