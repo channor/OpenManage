@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use App\Settings\AbsenceSettings;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property mixed $name
+ */
 class AbsenceType extends Model
 {
     use HasFactory;
@@ -28,5 +32,19 @@ class AbsenceType extends Model
     public function absences(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Absence::class, 'absence_type_id');
+    }
+
+    public static function getDefaultHolidaysType(): ?self
+    {
+        $settings = app(AbsenceSettings::class);
+
+        return static::where('name', $settings->default_holidays_name)->first();
+    }
+
+    public static function getDefaultOwnIllnessType(): ?self
+    {
+        $settings = app(AbsenceSettings::class);
+
+        return static::where('name', $settings->default_own_illness_name)->first();
     }
 }

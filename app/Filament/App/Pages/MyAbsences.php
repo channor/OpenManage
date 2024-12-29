@@ -162,7 +162,7 @@ class MyAbsences extends Page implements HasTable
                 ->action(function (array $data): void {
                     // 1) Find the "holiday" AbsenceType (assuming you store them in DB).
                     //    If you have a known ID or an enum, you can hardcode that instead.
-                    $holidayTypeId = AbsenceType::where('name', config('open_manage.absence.default_holidays_name'))->value('id');
+                    $holidayTypeId = AbsenceType::getDefaultHolidaysType()->id;
 
                     $user = Auth::user();
                     $person = $user?->person;

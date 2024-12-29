@@ -3,6 +3,7 @@
 namespace App\Filament\App\Widgets;
 
 use App\Models\Absence;
+use App\Models\AbsenceType;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
@@ -70,7 +71,7 @@ class MyAbsencesStats extends Widget
             $typeName = $items->first()->absenceType->name ?? 'Unknown';
 
             // If this is own illness, we want to split them further by is_medically_certified
-            $own_illness = config('open_manage.absence.default_own_illness_name');
+            $own_illness = AbsenceType::getDefaultOwnIllnessType()->name;
             if ($typeName === $own_illness) {
                 // Group again by is_medically_certified
                 $subGroups = $items->groupBy('is_medically_certified');
