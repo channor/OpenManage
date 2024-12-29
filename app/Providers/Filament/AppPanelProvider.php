@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\App\Pages\ViewMyAbsence;
 use App\Filament\App\Resources\AbsenceTypeResource\Pages\CreateAbsenceType;
 use App\Filament\App\Resources\AbsenceTypeResource\Pages\ListAbsenceTypes;
 use App\Settings\AppSettings;
@@ -21,6 +22,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
@@ -36,6 +38,10 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->routes(function () {
+                Route::get('/my-absences/{record}', ViewMyAbsence::class)
+                    ->name('pages.view-my-absence');
+            })
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])

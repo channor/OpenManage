@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
@@ -11,6 +12,7 @@ enum AbsenceStatus: string implements HasLabel, HasColor
     case Approved = "approved";
     case Denied = "denied";
     case Cancelled = "cancelled";
+    case Requested = "requested";
 
 
     public function getLabel(): ?string
@@ -20,6 +22,7 @@ enum AbsenceStatus: string implements HasLabel, HasColor
             self::Approved => __("Approved"),
             self::Denied => __("Denied"),
             self::Cancelled => __("Cancelled"),
+            self::Requested => __("Requested"),
 
         };
     }
@@ -31,6 +34,7 @@ enum AbsenceStatus: string implements HasLabel, HasColor
             self::Approved => 'success',
             self::Denied => 'danger',
             self::Cancelled => 'warning',
+            self::Requested => Color::Yellow,
         };
     }
 }

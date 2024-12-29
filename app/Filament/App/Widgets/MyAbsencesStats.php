@@ -9,13 +9,8 @@ use Illuminate\Support\Carbon;
 
 class MyAbsencesStats extends Widget
 {
-    // In Filament 3, you can define a static $sort if you want ordering among multiple widgets.
     protected static ?int $sort = 1;
 
-    /**
-     * Possibly, we can define the 'view' to a custom Blade if we want.
-     * For a StatsOverview, we might do it differently, but let's show an example:
-     */
     protected static string $view = 'filament.app.widgets.my-absences-stats';
 
     public array $reports = [];
@@ -26,29 +21,27 @@ class MyAbsencesStats extends Widget
         $person = $user?->person;
 
         if (! $person) {
-            // Not linked or not logged in, no data
             $this->reports = [];
             return;
         }
 
-        // Build 3 different periods:
         $now = Carbon::now();
 
-        // 1) Last 12 months
+        // Last 12 months
         $this->reports[] = [
             'title' => 'Last 12 Months',
             'data'  => $this->buildStats($person->id, now()->subYear(), now()),
         ];
 
-        // 2) This Year (e.g. 2024)
-        $thisYearStart = $now->copy()->startOfYear();
-        $thisYearEnd   = $now->copy()->endOfYear();
+        // Current Year
+        $currentYearStart = $now->copy()->startOfYear();
+        $currentYearEnd   = $now->copy()->endOfYear();
         $this->reports[] = [
             'title' => 'This Year (' . $now->year . ')',
-            'data'  => $this->buildStats($person->id, $thisYearStart, $thisYearEnd),
+            'data'  => $this->buildStats($person->id, $currentYearStart, $currentYearEnd),
         ];
 
-        // 3) Last Year (e.g. 2023)
+        // Last Year
         $lastYear = $now->year - 1;
         $lastYearStart = Carbon::create($lastYear)->startOfYear();
         $lastYearEnd   = Carbon::create($lastYear)->endOfYear();
@@ -59,8 +52,9 @@ class MyAbsencesStats extends Widget
     }
 
     /**
-     * Builds stats for one period, grouped by absence type.
-     * Returns an array of [ ['type' => 'Sick Leave', 'count' => X, 'days' => Y ], ... ]
+     * 'Egen sykdom' is "Own illness", and stats is hardcoded for Norwegian laws
+     * @TODO Make stats more customizable.
+     * @TODO Make filter/tabs for different periods.
      */
     private function buildStats(int $personId, Carbon $start, Carbon $end): array
     {
@@ -69,25 +63,48 @@ class MyAbsencesStats extends Widget
             ->with('absenceType')
             ->get();
 
-        // Group by absence_type_id
         $grouped = $absences->groupBy('absence_type_id');
 
         $results = [];
         foreach ($grouped as $typeId => $items) {
             $typeName = $items->first()->absenceType->name ?? 'Unknown';
-            $count    = $items->count();
-            // Sum total days
-            $days = $items->sum(function ($absence) {
-                $startDate = $absence->start_date;
-                $endDate   = $absence->end_date ?? now();
-                return $endDate->diffInDays($startDate) + 1;
-            });
 
-            $results[] = [
-                'type'  => $typeName,
-                'count' => $count,
-                'days'  => $days,
-            ];
+            // If this is own illness, we want to split them further by is_medically_certified
+            $own_illness = config('open_manage.absence.default_own_illness_name');
+            if ($typeName === $own_illness) {
+                // Group again by is_medically_certified
+                $subGroups = $items->groupBy('is_medically_certified');
+
+                foreach ($subGroups as $certified => $subItems) {
+                    $count = $subItems->count();
+                    $days  = $subItems->sum(function ($absence) {
+                        $endDate = $absence->end_date ?? now();
+                        return $endDate->diffInDays($absence->start_date) + 1;
+                    });
+
+                    $label = $certified
+                        ? "$own_illness (doctor-certified)"
+                        : "$own_illness (self-certified)";
+
+                    $results[] = [
+                        'type'  => $label,
+                        'count' => $count,
+                        'days'  => $days,
+                    ];
+                }
+            } else {
+                $count = $items->count();
+                $days  = $items->sum(function ($absence) {
+                    $endDate = $absence->end_date ?? now();
+                    return $endDate->diffInDays($absence->start_date) + 1;
+                });
+
+                $results[] = [
+                    'type'  => $typeName,
+                    'count' => $count,
+                    'days'  => $days,
+                ];
+            }
         }
 
         return $results;
