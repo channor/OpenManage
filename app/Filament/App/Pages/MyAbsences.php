@@ -167,7 +167,7 @@ class MyAbsences extends Page implements HasTable
                             'is_medically_certified' => false,
                         ]);
 
-                        Notification::make('Holiday request submitted successfully!')->send();
+                        Notification::make()->title('Holiday request submitted successfully!')->send();
                         $notifiedManager = Absence::getNotificationRecipient();
                         $notifiedManager->notify(
                             Notification::make()
