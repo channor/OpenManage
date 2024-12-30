@@ -18,7 +18,7 @@ class Absence extends Model
 
     protected static function booted()
     {
-        static::saving(function ($absence) {
+        static::saving(function (Absence $absence) {
             // If has_hours is false, force 00:00 for the hours
             if (! $absence->absenceType->has_hours) {
                 if ($absence->start_date) {
@@ -112,5 +112,18 @@ class Absence extends Model
     public function absenceType(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(AbsenceType::class);
+    }
+
+    public static function getNotificationRecipient(): User
+    {
+        // Retrieve the first user with the 'super_admin' role
+        $recipient = User::role('super_admin')->first();
+
+        // If no super_admin exists, throw an exception
+        if (!$recipient) {
+            throw new \Exception('No user with the super_admin role found.');
+        }
+
+        return $recipient;
     }
 }

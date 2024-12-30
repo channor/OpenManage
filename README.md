@@ -15,7 +15,6 @@
 ## PLANNED / TODO
 
 - [ ] Add inactivity at date column and logic to users.
-- [ ] Absence tracking/management.
 - [ ] Welcome email new users.
 - [ ] Create new user option with roles selection when creating person.
 - [ ] Add logic for absences where type `has_hours = true`.
@@ -31,6 +30,12 @@
 5. Edit database settings in .env.
 6. `php artisan migrate`
 7. Create your first user with `php artisan make:filament-user`
+
+---
+
+## Setup
+
+
 
 ---
 

@@ -149,30 +149,37 @@ class MyAbsences extends Page implements HasTable
                 ])
                 ->modalHeading('Request Holiday')
                 ->modalSubmitActionLabel('Submit Request')
-                // The core action: create a new absence record with type = "holiday"
                 ->action(function (array $data): void {
                     if(\auth()->user()->can('absence_request')) {
-                        // 1) Find the "holiday" AbsenceType (assuming you store them in DB).
-                        //    If you have a known ID or an enum, you can hardcode that instead.
                         $holidayTypeId = AbsenceType::getDefaultHolidaysType()->id;
 
                         $user = Auth::user();
                         $person = $user?->person;
 
-                        // 2) Create the absence
-                        Absence::create([
+                        $absence = Absence::create([
                             'person_id' => $person->id,
                             'absence_type_id' => $holidayTypeId,
                             'start_date' => $data['start_date'],
                             'end_date' => $data['end_date'] ?? null,
                             'notes' => $data['notes'] ?? null,
                             'status' => AbsenceStatus::Requested->value,
-                            'is_paid' => true,  // or false, or any default
+                            'is_paid' => true,
                             'is_medically_certified' => false,
                         ]);
 
-                        // Optionally display a success notification
                         Notification::make('Holiday request submitted successfully!')->send();
+                        $notifiedManager = Absence::getNotificationRecipient();
+                        $notifiedManager->notify(
+                            Notification::make()
+                                ->title('Holiday request')
+                                ->actions([
+                                    \Filament\Notifications\Actions\Action::make('View')
+                                        ->url(ViewAbsence::getUrl(['record' => $absence]))
+                                        ->button()
+                                        ->markAsRead()
+                                ])
+                                ->toDatabase()
+                        );
                     }
                 })
                 ->visible(fn () => \auth()->user()->can('absence_request')),

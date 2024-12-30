@@ -35,6 +35,7 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->brandName(fn () => app(AppSettings::class)->company_name)
             ->login()
+            ->databaseNotifications()
             ->colors([
                 'primary' => Color::Amber,
             ])

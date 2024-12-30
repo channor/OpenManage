@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property mixed $name
+ * @property mixed $id
  */
 class AbsenceType extends Model
 {
