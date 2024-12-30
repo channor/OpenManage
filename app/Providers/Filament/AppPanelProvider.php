@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\App\Pages\ViewMyAbsence;
 use App\Filament\App\Resources\AbsenceTypeResource\Pages\CreateAbsenceType;
 use App\Filament\App\Resources\AbsenceTypeResource\Pages\ListAbsenceTypes;
 use App\Settings\AppSettings;
@@ -21,6 +22,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
@@ -36,9 +38,10 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
-            ])
+            ->routes(function () {
+                Route::get('/my-absences/{record}', ViewMyAbsence::class)
+                    ->name('pages.view-my-absence');
+            })
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([
@@ -46,12 +49,15 @@ class AppPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\\Filament\\App\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make()->label('Absence & Holidays')->icon('heroicon-o-arrow-right-start-on-rectangle'),
-                NavigationGroup::make('System')->collapsed(),
+                NavigationGroup::make()
+                    ->label(__('Absence & Holidays'))
+                    ->icon('heroicon-o-arrow-right-start-on-rectangle'),
+                NavigationGroup::make()
+                    ->label(__('Setting and administration'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(true)
             ])
             ->middleware([
                 EncryptCookies::class,

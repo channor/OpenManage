@@ -10,18 +10,16 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AbsenceTypeResource extends Resource
 {
     protected static ?string $model = AbsenceType::class;
 
-    protected static ?string $navigationGroup = 'Absence & Holidays';
+    protected static ?string $navigationGroup = 'Setting and administration';
 
     public static function getNavigationLabel(): string
     {
-        return __('Types');
+        return __('Absence types');
     }
 
     /**

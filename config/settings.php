@@ -7,7 +7,8 @@ return [
      * put them (manually) here.
      */
     'settings' => [
-        \App\Settings\AppSettings::class
+        \App\Settings\AppSettings::class,
+        \App\Settings\AbsenceSettings::class,
     ],
 
     /*

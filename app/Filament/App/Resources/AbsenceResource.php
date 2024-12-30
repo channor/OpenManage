@@ -6,16 +6,12 @@ use App\Enums\AbsenceStatus;
 use App\Filament\App\Resources\AbsenceResource\Pages;
 use App\Filament\App\Resources\AbsenceResource\RelationManagers;
 use App\Models\Absence;
-use App\Models\AbsenceType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Traits\Conditionable;
-use PHPUnit\Metadata\Group;
 
 class AbsenceResource extends Resource
 {
@@ -28,7 +24,7 @@ class AbsenceResource extends Resource
      */
     public static function getNavigationLabel(): string
     {
-        return __("Absence list");
+        return __("Manage absences");
     }
 
     public static function form(Form $form): Form

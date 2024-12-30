@@ -12,10 +12,9 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationLabel = 'App Settings';
     protected static ?string $slug = 'app-settings';
-    protected static ?string $navigationGroup = 'System';
+    protected static ?string $navigationGroup = 'Setting and administration';
     protected static string $view = 'filament.app.pages.manage-app-settings';
 
     // Instead of storing the entire AppSettings object, store each field individually.
@@ -73,5 +72,10 @@ class ManageAppSettings extends Page implements Forms\Contracts\HasForms
         Notification::make()
             ->title('Settings saved.')
             ->send();
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_settings');
     }
 }
