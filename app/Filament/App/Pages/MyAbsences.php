@@ -49,16 +49,7 @@ class MyAbsences extends Page implements HasTable
      */
     protected function getTableQuery(): Builder
     {
-        $user = Auth::user();
-        $person = $user?->person;
-
-        if (! $person) {
-            return Absence::query()->whereRaw('1=0');
-        }
-
-        // Sort by start_date descending
-        return Absence::query()
-            ->where('person_id', $person->id)
+        return Absence::byPerson()
             ->orderBy('start_date', 'desc');
     }
 
@@ -160,28 +151,36 @@ class MyAbsences extends Page implements HasTable
                 ->modalSubmitActionLabel('Submit Request')
                 // The core action: create a new absence record with type = "holiday"
                 ->action(function (array $data): void {
-                    // 1) Find the "holiday" AbsenceType (assuming you store them in DB).
-                    //    If you have a known ID or an enum, you can hardcode that instead.
-                    $holidayTypeId = AbsenceType::getDefaultHolidaysType()->id;
+                    if(\auth()->user()->can('absence_request')) {
+                        // 1) Find the "holiday" AbsenceType (assuming you store them in DB).
+                        //    If you have a known ID or an enum, you can hardcode that instead.
+                        $holidayTypeId = AbsenceType::getDefaultHolidaysType()->id;
 
-                    $user = Auth::user();
-                    $person = $user?->person;
+                        $user = Auth::user();
+                        $person = $user?->person;
 
-                    // 2) Create the absence
-                    Absence::create([
-                        'person_id'            => $person->id,
-                        'absence_type_id'      => $holidayTypeId,
-                        'start_date'           => $data['start_date'],
-                        'end_date'             => $data['end_date'] ?? null,
-                        'notes'                => $data['notes'] ?? null,
-                        'status'               => AbsenceStatus::Requested->value,
-                        'is_paid'              => true,  // or false, or any default
-                        'is_medically_certified' => false,
-                    ]);
+                        // 2) Create the absence
+                        Absence::create([
+                            'person_id' => $person->id,
+                            'absence_type_id' => $holidayTypeId,
+                            'start_date' => $data['start_date'],
+                            'end_date' => $data['end_date'] ?? null,
+                            'notes' => $data['notes'] ?? null,
+                            'status' => AbsenceStatus::Requested->value,
+                            'is_paid' => true,  // or false, or any default
+                            'is_medically_certified' => false,
+                        ]);
 
-                    // Optionally display a success notification
-                    Notification::make('Holiday request submitted successfully!')->send();
-                }),
+                        // Optionally display a success notification
+                        Notification::make('Holiday request submitted successfully!')->send();
+                    }
+                })
+                ->visible(fn () => \auth()->user()->can('absence_request')),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('absence_view_own');
     }
 }

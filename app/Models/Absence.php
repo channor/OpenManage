@@ -4,10 +4,14 @@ namespace App\Models;
 
 use App\Enums\AbsenceStatus;
 use App\Enums\PersonType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property mixed $person_id
+ */
 class Absence extends Model
 {
     use HasFactory, SoftDeletes;
@@ -28,6 +32,23 @@ class Absence extends Model
                 }
             }
         });
+    }
+
+    public function scopeByPerson(Builder $query, ?int $personId = null): Builder
+    {
+        // If no personId is provided, attempt to retrieve it from the authenticated user
+        if (is_null($personId)) {
+            $user = auth()->user();
+
+            // Ensure the user has an associated person
+            if ($user && $user->person) {
+                $personId = $user->person->id;
+            } else {
+                return $query->whereRaw('1=0');
+            }
+        }
+
+        return $query->where('person_id', $personId);
     }
 
     /**

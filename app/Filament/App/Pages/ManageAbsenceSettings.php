@@ -13,10 +13,10 @@ use Filament\Pages\Page;
 class ManageAbsenceSettings extends Page implements Forms\Contracts\HasForms
 {
     use Forms\Concerns\InteractsWithForms;
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected static ?string $navigationLabel = 'Absence Settings';
     protected static ?string $slug = 'absence-settings';
-    protected static ?string $navigationGroup = 'System';
+    protected static ?string $navigationGroup = 'Setting and administration';
 
     protected static string $view = 'filament.app.pages.manage-absence-settings';
 
@@ -37,9 +37,11 @@ class ManageAbsenceSettings extends Page implements Forms\Contracts\HasForms
         return $form->schema([
             Forms\Components\TextInput::make('default_holidays_name')
                 ->label('Default holidays name')
+                ->helperText(__('Make sure you create an absence type named the same.'))
                 ->required(),
             Forms\Components\TextInput::make('default_own_illness_name')
                 ->label('Default own illness name')
+                ->helperText(__('Make sure you create an absence type named the same.'))
                 ->required(),
         ]);
     }
@@ -54,5 +56,10 @@ class ManageAbsenceSettings extends Page implements Forms\Contracts\HasForms
         Notification::make()
             ->title('Settings saved.')
             ->send();
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('manage_settings');
     }
 }

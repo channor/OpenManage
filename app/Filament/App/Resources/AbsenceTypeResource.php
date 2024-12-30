@@ -15,11 +15,11 @@ class AbsenceTypeResource extends Resource
 {
     protected static ?string $model = AbsenceType::class;
 
-    protected static ?string $navigationGroup = 'Absence & Holidays';
+    protected static ?string $navigationGroup = 'Setting and administration';
 
     public static function getNavigationLabel(): string
     {
-        return __('Types');
+        return __('Absence types');
     }
 
     /**

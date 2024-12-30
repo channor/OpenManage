@@ -51,8 +51,13 @@ class AppPanelProvider extends PanelProvider
             ->widgets([
             ])
             ->navigationGroups([
-                NavigationGroup::make()->label('Absence & Holidays')->icon('heroicon-o-arrow-right-start-on-rectangle'),
-                NavigationGroup::make('System')->collapsed(),
+                NavigationGroup::make()
+                    ->label(__('Absence & Holidays'))
+                    ->icon('heroicon-o-arrow-right-start-on-rectangle'),
+                NavigationGroup::make()
+                    ->label(__('Setting and administration'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(true)
             ])
             ->middleware([
                 EncryptCookies::class,
