@@ -42,9 +42,6 @@ class AppPanelProvider extends PanelProvider
                 Route::get('/my-absences/{record}', ViewMyAbsence::class)
                     ->name('pages.view-my-absence');
             })
-            ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
-            ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([
