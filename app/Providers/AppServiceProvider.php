@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Settings\AppSettings;
-use BezhanSalleh\FilamentShield\FilamentShield;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
