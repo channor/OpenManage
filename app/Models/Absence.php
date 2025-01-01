@@ -4,13 +4,17 @@ namespace App\Models;
 
 use App\Enums\AbsenceStatus;
 use App\Enums\PersonType;
+use App\Notifications\AbsenceCreated;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property mixed $person_id
+ * @property Person $person
  */
 class Absence extends Model
 {
@@ -31,6 +35,12 @@ class Absence extends Model
                     $absence->estimated_end_date->setTime(0, 0, 0);
                 }
             }
+        });
+
+        static::created(function (Absence $absence) {
+            $user = $absence->person->user;
+
+            $user->notify(new AbsenceCreated($absence));
         });
     }
 
@@ -125,5 +135,18 @@ class Absence extends Model
         }
 
         return $recipient;
+    }
+
+    public static function getNotificationRecipients()
+    {
+        // Retrieve the first user with the 'super_admin' role
+        $recipients = User::role('super_admin');
+
+        // If no super_admin exists, throw an exception
+        if (!$recipients->count()) {
+            throw new \Exception('No users with the super_admin role found.');
+        }
+
+        return $recipients;
     }
 }

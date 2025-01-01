@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ViewMyAbsence extends Page
 {
-    // Optional: title, navigation label/icon if you want the page in the sidebar
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
     // Where the Blade file for this page lives:
     protected static string $view = 'filament.app.pages.view-my-absence';
 

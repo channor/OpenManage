@@ -174,7 +174,7 @@ class MyAbsences extends Page implements HasTable
                                 ->title('Holiday request')
                                 ->actions([
                                     \Filament\Notifications\Actions\Action::make('View')
-                                        ->url(ViewAbsence::getUrl(['record' => $absence]))
+                                        ->url(ViewAbsence::getUrl(['absence' => $absence]))
                                         ->button()
                                         ->markAsRead()
                                 ])
@@ -184,10 +184,5 @@ class MyAbsences extends Page implements HasTable
                 })
                 ->visible(fn () => \auth()->user()->can('absence_request')),
         ];
-    }
-
-    public static function canAccess(): bool
-    {
-        return auth()->user()->can('absence_view_own');
     }
 }
