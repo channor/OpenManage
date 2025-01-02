@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Filament\App\Pages\ViewMyAbsence;
+use App\Filament\App\Resources\MyAbsenceResource\Pages\ViewMyAbsence;
 use App\Models\Absence;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
@@ -43,7 +43,7 @@ class AbsenceCreated extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(__('An absence is registered.'))
             ->line(__('See more details by clicking on the button below.'))
-            ->action(__('View details'), ViewMyAbsence::getUrl([$this->absence]));
+            ->action(__('View details'), ViewMyAbsence::getUrl(['record' => $this->absence]));
     }
 
     public function toDatabase(): array
@@ -54,9 +54,9 @@ class AbsenceCreated extends Notification implements ShouldQueue
             ->actions([
                 Action::make('view')
                     ->label(__("View"))
-                    ->url(ViewMyAbsence::getUrl([$this->absence]))
+                    ->url(ViewMyAbsence::getUrl(['record' => $this->absence]))
                     ->markAsRead()
             ])
-            ->toDatabase();
+            ->getDatabaseMessage();
     }
 }

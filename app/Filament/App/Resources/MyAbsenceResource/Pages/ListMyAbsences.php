@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources\MyAbsenceResource\Pages;
 use App\Filament\App\Resources\MyAbsenceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListMyAbsences extends ListRecords
 {
@@ -13,7 +14,8 @@ class ListMyAbsences extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label("Request time-off"),
         ];
     }
 }

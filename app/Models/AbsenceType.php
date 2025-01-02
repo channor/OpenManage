@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AbsenceCategory;
 use App\Settings\AbsenceSettings;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,16 @@ class AbsenceType extends Model
 
     protected $fillable = [
         'name',
+        'category',
+        'description',
+        'icon',
+        'color',
         'employee_creation',
         'has_hours',
     ];
 
     protected $casts = [
+        'category' => AbsenceCategory::class,
         'employee_creation' => 'boolean',
         'has_hours' => 'boolean',
     ];
@@ -48,4 +54,10 @@ class AbsenceType extends Model
 
         return static::where('name', $settings->default_own_illness_name)->first();
     }
+
+    public static function getAvailableOptionsForEmployees()
+    {
+        return self::where('employee_creation', true)->pluck('name', 'id');
+    }
+
 }

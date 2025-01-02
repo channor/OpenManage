@@ -2,24 +2,35 @@
 
 namespace App\Filament\App\Resources;
 
+use App\Enums\AbsenceStatus;
 use App\Filament\App\Resources\MyAbsenceResource\Pages;
 use App\Filament\App\Resources\MyAbsenceResource\RelationManagers;
+use App\Models\Absence;
 use App\Models\AbsenceType;
 use App\Models\MyAbsence;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Columns;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MyAbsenceResource extends Resource
 {
     protected static ?string $model = MyAbsence::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?int $navigationSort = -3;
+
+    public static function getNavigationLabel(): string
+    {
+        return __("My absences");
+    }
+
+    public static function getNavigationGroup(): string
+    {
+        return 'Absence & Holidays';
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -30,15 +41,23 @@ class MyAbsenceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Wizard::make([
-                    Forms\Components\Wizard\Step::make('Apply for')
-                        ->schema([
-                            Forms\Components\Radio::make('absence_type_id')
-                                ->options(AbsenceType::all()->where('employee_creation', true)->pluck('name', 'id'))
-                                ->inline()
-                                ->hiddenLabel()
-                        ]),
-                ]),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Select::make('absence_type_id')
+                                    ->label(__('Absence type'))
+                                    ->options(AbsenceType::getAvailableOptionsForEmployees())
+                                    ->required()
+                                    ->columnSpan(2),
+                                Forms\Components\Textarea::make('notice'),
+                            ]),
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\DatePicker::make('start_date'),
+                                Forms\Components\DatePicker::make('end_date'),
+                            ]),
+                    ])->columns(2)
             ]);
     }
 
@@ -46,20 +65,52 @@ class MyAbsenceResource extends Resource
     {
         return $table
             ->columns([
-                Columns\TextColumn::make('absenceType.name'),
-                Columns\TextColumn::make('person.name')
+                Tables\Columns\TextColumn::make('absenceType.name')
+                    ->label('Type')
+                    ->icon(fn (MyAbsence $record) => $record->absenceType->icon ?? null)
+                    ->iconColor(fn (MyAbsence $record) => $record->absenceType->color ? Color::hex($record->absenceType->color) : null)
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->translateLabel()
+                    ->badge(),
+
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Start')
+                    ->dateTime()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('End')
+                    ->dateTime()
+                    ->sortable(),
+
+                // Example booleans:
+                Tables\Columns\IconColumn::make('is_medically_certified')
+                    ->label('Doctor’s Note?')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\IconColumn::make('occupational')
+                    ->label('Work-related?')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options(AbsenceStatus::class),
+                Tables\Filters\SelectFilter::make('absence_type_id')
+                    ->label(__("Absence type"))
+                    ->options(AbsenceType::pluck('name', 'id'))
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->authorize('update', MyAbsence::class),
+                Tables\Actions\DeleteAction::make()
+                    ->authorize('delete', MyAbsence::class)
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->defaultSort('start_date', 'desc');
     }
 
     public static function getRelations(): array
@@ -74,7 +125,13 @@ class MyAbsenceResource extends Resource
         return [
             'index' => Pages\ListMyAbsences::route('/'),
             'create' => Pages\CreateMyAbsence::route('/create'),
+            'view' => Pages\ViewMyAbsence::route('/{record}'),
             'edit' => Pages\EditMyAbsence::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole('employee');
     }
 }

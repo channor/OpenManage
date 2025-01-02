@@ -13,6 +13,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
+ * Class Absence
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder byPerson()
+ *
  * @property mixed $person_id
  * @property Person $person
  */
@@ -99,6 +103,32 @@ class Absence extends Model
         'is_paid' => 'boolean',
         'status' => AbsenceStatus::class
     ];
+
+    /**
+     * Check if user is the right owner by checking User's person relation.
+     */
+    public function isOwnedBy(User $user = null): bool
+    {
+        if($user === null) {
+            $user = auth()->user();
+        }
+
+        return $user->person?->id === $this->person_id;
+    }
+
+    /**
+     * Check if the user is a manager of the current absence.
+     *
+     * Future function if an absence has a selected manager.
+     */
+    public function canBeManagedBy(User $user): bool
+    {
+        /*
+         * return $this->manager_id === $user->id || $user->isAbsenceManager();
+         */
+
+        return $user->isAbsenceManager();
+    }
 
     /**
      * Relationships

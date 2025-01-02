@@ -50,6 +50,14 @@ class User extends Authenticatable implements FilamentUser
         'password' => 'hashed',
     ];
 
+    /**
+     * Check if the user is a global absence manager.
+     */
+    public function isAbsenceManager(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
     public function person()
     {
         return $this->hasOne(Person::class);

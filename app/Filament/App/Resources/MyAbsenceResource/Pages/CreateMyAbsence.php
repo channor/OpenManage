@@ -9,4 +9,12 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMyAbsence extends CreateRecord
 {
     protected static string $resource = MyAbsenceResource::class;
+
+    /**
+     * @return string|\Illuminate\Contracts\Support\Htmlable
+     */
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return __("Request time off");
+    }
 }

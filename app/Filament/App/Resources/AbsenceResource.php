@@ -2,10 +2,12 @@
 
 namespace App\Filament\App\Resources;
 
+use App\Enums\AbsenceCategory;
 use App\Enums\AbsenceStatus;
 use App\Filament\App\Resources\AbsenceResource\Pages;
 use App\Filament\App\Resources\AbsenceResource\RelationManagers;
 use App\Models\Absence;
+use App\Models\AbsenceType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -31,52 +33,92 @@ class AbsenceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()->schema([
-                    Forms\Components\Select::make('absence_type_id')
-                        ->relationship('absenceType', 'name')
-                        ->required(),
+                Forms\Components\Section::make('General absence data')->schema([
+                    Forms\Components\Group::make()->schema([
+                        Forms\Components\Select::make('absence_type_id')
+                            ->relationship('absenceType', 'name')
+                            ->reactive()
+                            ->required(),
 
-                    Forms\Components\Select::make('person_id')
-                        ->relationship('person', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->required(),
+                        Forms\Components\Select::make('person_id')
+                            ->relationship('person', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
 
-                    Forms\Components\DatePicker::make('start_date')
-                        ->label('Start (Date Only)')
-                        ->required(),
+                        Forms\Components\Group::make()->schema([
+                            Forms\Components\Textarea::make('notes')
+                                ->columnSpanFull(),
+                        ]),
+                    ]),
 
-                    // DatePicker shown ONLY if has_hours = false
-                    Forms\Components\DatePicker::make('end_date')
-                        ->label('End (Date Only)')
-                        ->nullable(),
+                    Forms\Components\Group::make()->schema([
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label('Start (Date Only)')
+                            ->required(),
 
-                    // DatePicker shown ONLY if has_hours = false
-                    Forms\Components\DatePicker::make('estimated_end_date')
-                        ->label('Estimated end (Date Only)')
-                        ->nullable(),
+                        // DatePicker shown ONLY if has_hours = false
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('End (Date Only)')
+                            ->nullable(),
+
+                        // DatePicker shown ONLY if has_hours = false
+                        Forms\Components\DatePicker::make('estimated_end_date')
+                            ->label('Estimated end (Date Only)')
+                            ->nullable()
+                            ->visible(function (Forms\Get $get) {
+                                // Get the chosen absence_type_id from the form
+                                $typeId = $get('absence_type_id');
+
+                                if (! $typeId) {
+                                    return false; // nothing selected yet
+                                }
+
+                                // Option 1: quick DB lookup
+                                $category = AbsenceType::query()
+                                    ->whereKey($typeId)
+                                    ->value('category'); // or whatever column holds the category
+
+                                return $category === AbsenceCategory::SICK_LEAVES;
+                            }),
+                    ])
                 ])->columns([
                     'sm' => 1,
                     'md' => 2,
                 ]),
-                Forms\Components\Section::make()->schema([
-                    Forms\Components\Group::make()->schema([
-                        Forms\Components\Textarea::make('notes')
-                            ->columnSpanFull(),
-                    ]),
+
+                Forms\Components\Section::make('Sick leaves details')->schema([
                     Forms\Components\Group::make()->schema([
                         Forms\Components\Toggle::make('is_medically_certified')
                             ->required(),
                         Forms\Components\Toggle::make('occupational')
                             ->helperText(__("Related to the working place or environment."))
                             ->required(),
-                        Forms\Components\Select::make('status')
-                            ->options(AbsenceStatus::class)
-                            ->required()
-                            ->inlineLabel()
-                            ->default('approved'),
                     ]),
-                ])->columns(),
+                ])->columns()
+                    ->visible(function (Forms\Get $get) {
+                        // Get the chosen absence_type_id from the form
+                        $typeId = $get('absence_type_id');
+
+                        if (! $typeId) {
+                            return false; // nothing selected yet
+                        }
+
+                        // Option 1: quick DB lookup
+                        $category = AbsenceType::query()
+                            ->whereKey($typeId)
+                            ->value('category'); // or whatever column holds the category
+
+                        return $category === AbsenceCategory::SICK_LEAVES;
+                    }),
+
+                Forms\Components\Section::make('Status')->schema([
+                    Forms\Components\Select::make('status')
+                        ->options(AbsenceStatus::class)
+                        ->required()
+                        ->inlineLabel()
+                        ->default('approved'),
+                ])
             ]);
     }
 

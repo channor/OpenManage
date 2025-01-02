@@ -11,9 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -23,29 +21,45 @@ class UserResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Credentials')->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('email')
-                        ->email()
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\DateTimePicker::make('email_verified_at'),
-                    Forms\Components\TextInput::make('password')
-                        ->password()
-                        ->required()
-                        ->maxLength(255),
-                ])->columns(2),
+        return $form->schema([
+            Forms\Components\Section::make('General')->schema([
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->unique(ignoreRecord: true)
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\DateTimePicker::make('email_verified_at'),
+            ])->columns(2),
 
-                Forms\Components\Section::make('Roles')->schema([
-                    Forms\Components\CheckboxList::make('roles')
-                        ->relationship('roles', 'name')
-                        ->hiddenLabel(),
-                ]),
-            ]);
+            Forms\Components\Section::make('Change password')->schema([
+                Forms\Components\TextInput::make('password')
+                    ->label('Password')
+                    ->translateLabel()
+                    ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
+                    ->dehydrated(fn (?string $state): bool => filled($state))
+                    ->password()
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->confirmed()
+                    ->maxLength(255),
+
+                Forms\Components\TextInput::make('password_confirmation')
+                    ->label('Confirm password')
+                    ->translateLabel()
+                    ->password()
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->maxLength(255),
+
+            ])->columns(),
+
+            Forms\Components\Section::make('Roles')->schema([
+                Forms\Components\CheckboxList::make('roles')
+                    ->relationship('roles', 'name')
+                    ->hiddenLabel(),
+            ]),
+        ]);
     }
 
     public static function table(Table $table): Table

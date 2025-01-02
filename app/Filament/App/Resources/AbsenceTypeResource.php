@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources;
 
+use App\Enums\AbsenceCategory;
 use App\Filament\App\Resources\AbsenceTypeResource\Pages;
 use App\Filament\App\Resources\AbsenceTypeResource\RelationManagers;
 use App\Models\AbsenceType;
@@ -37,6 +38,14 @@ class AbsenceTypeResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(150),
+                Forms\Components\Select::make('category')
+                    ->options(AbsenceCategory::class),
+                Forms\Components\TextInput::make('description')
+                    ->nullable()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('icon'),
+                Forms\Components\ColorPicker::make('color')
+                    ->nullable(),
                 Forms\Components\Toggle::make('employee_creation')
                     ->required(),
                 Forms\Components\Toggle::make('has_hours')
@@ -49,6 +58,8 @@ class AbsenceTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('category')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('employee_creation')
                     ->boolean(),

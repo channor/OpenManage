@@ -17,7 +17,7 @@ class AbsencePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('absence_view_any');
+        return $user->isAbsenceManager() || $user->can('absence_view_any');
     }
 
     /**
@@ -25,8 +25,9 @@ class AbsencePolicy
      */
     public function view(User $user, Absence $absence): bool
     {
-        return $user->can('absence_view') ||
-            ($user->can('absence_view_own') && $absence->person_id === $user->person->id);
+        return $user->isAbsenceManager()
+            || $absence->isOwnedBy($user)
+            || $absence->canBeManagedBy($user);
     }
 
     /**
@@ -34,7 +35,7 @@ class AbsencePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('absence_create');
+        return $user->isAbsenceManager() || $user->can('absence_create');
     }
 
     /**
@@ -42,8 +43,11 @@ class AbsencePolicy
      */
     public function update(User $user, Absence $absence): bool
     {
-        return $user->can('absence_update') ||
-            ($user->person->id === $absence->person_id && $absence->status === AbsenceStatus::Requested->value);
+        if($user->isAbsenceManager() || $absence->canBeManagedBy($user)) {
+            return true;
+        }
+
+        return $absence->isOwnedBy($user) && $absence->status === AbsenceStatus::Requested;
     }
 
     /**
@@ -51,8 +55,8 @@ class AbsencePolicy
      */
     public function delete(User $user, Absence $absence): bool
     {
-        return $user->can('absence_delete') ||
-            ($user->person->id === $absence->person_id && $absence->status === AbsenceStatus::Requested->value);
+        return $absence->canBeManagedBy($user) || $user->isAbsenceManager() ||
+            ($absence->isOwnedBy($user) && $absence->status === AbsenceStatus::Requested);
     }
 
     /**
