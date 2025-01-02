@@ -12,6 +12,7 @@ use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
@@ -57,6 +58,7 @@ class UserResource extends Resource
             Forms\Components\Section::make('Roles')->schema([
                 Forms\Components\CheckboxList::make('roles')
                     ->relationship('roles', 'name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => Str::headline($record->name))
                     ->hiddenLabel(),
             ]),
         ]);
@@ -72,6 +74,7 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Roles')
+                    ->formatStateUsing(fn ($state): string => Str::headline($state))
                     ->color(Color::Gray)
                     ->badge(),
                 Tables\Columns\TextColumn::make('email_verified_at')

@@ -35,6 +35,7 @@ class PermissionsSeeder extends Seeder
         $custom_permissions = [
             \App\Enums\Permission::MANAGE_SETTINGS->value,
             \App\Enums\Permission::ABSENCE_REQUEST->value,
+            \App\Enums\Permission::ABSENCE_VIEW_SENSITIVE->value,
         ];
 
         $permissions = $this->generatePermissions($actions, $models, $custom_permissions);

@@ -56,6 +56,7 @@ class AbsenceTypeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultGroup('category')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),

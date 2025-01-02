@@ -17,4 +17,5 @@ enum Permission: string
     case FORCE_DELETE_ANY = 'force_delete_any';
     case MANAGE_SETTINGS = 'manage_settings';
     case ABSENCE_REQUEST = 'absence_request';
+    case ABSENCE_VIEW_SENSITIVE = 'absence_view_sensitive';
 }
