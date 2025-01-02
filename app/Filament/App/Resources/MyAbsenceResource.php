@@ -54,8 +54,16 @@ class MyAbsenceResource extends Resource
                             ]),
                         Forms\Components\Group::make()
                             ->schema([
-                                Forms\Components\DatePicker::make('start_date'),
-                                Forms\Components\DatePicker::make('end_date'),
+                                Forms\Components\DatePicker::make('start_date')
+                                    ->required()
+                                    ->rules(['date']),
+                                Forms\Components\DatePicker::make('end_date')
+                                    ->required()
+                                    ->afterOrEqual('start_date'),
+                                Forms\Components\Select::make('status')
+                                    ->options(AbsenceStatus::class)
+                                    ->visibleOn(['view', 'edit'])
+                                    ->disabled()
                             ]),
                     ])->columns(2)
             ]);
