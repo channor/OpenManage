@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\AbsenceCreatedEvent;
+use App\Events\AbsenceRequestedEvent;
+use App\Events\AbsenceStatusUpdatedEvent;
+use App\Listeners\SendAbsenceCreatedNotification;
+use App\Listeners\SendAbsenceRequestedNotification;
+use App\Listeners\SendAbsenceStatusUpdatedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,6 +24,19 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+        AbsenceCreatedEvent::class => [
+            SendAbsenceCreatedNotification::class,
+        ],
+
+        AbsenceRequestedEvent::class => [
+            SendAbsenceRequestedNotification::class,
+        ],
+
+        AbsenceStatusUpdatedEvent::class => [
+            SendAbsenceStatusUpdatedNotification::class,
+        ],
+
     ];
 
     /**

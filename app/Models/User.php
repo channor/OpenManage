@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -57,6 +58,18 @@ class User extends Authenticatable implements FilamentUser
     public function isAbsenceManager(): bool
     {
         return $this->hasAnyRole(UserRole::SUPER_ADMIN->value, UserRole::HR_MANAGER);
+    }
+
+    /**
+     * Usage: $managers = User::getAbsenceManagers()
+     */
+    public static function getAbsenceManagers(): Collection
+    {
+        return User::with('roles')
+            ->get()
+            ->filter(function ($user) {
+                return $user->roles->pluck('name')->intersect(Absence::MANAGING_ROLES)->isNotEmpty();
+            });
     }
 
     public function person()

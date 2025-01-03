@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\AbsenceStatus;
 use App\Enums\PersonType;
+use App\Enums\UserRole;
+use App\Events\AbsenceStatusUpdatedEvent;
 use App\Notifications\AbsenceCreated;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +26,8 @@ class Absence extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const MANAGING_ROLES = [UserRole::HR_MANAGER->value, UserRole::SUPER_ADMIN->value];
+
     protected static function booted()
     {
         static::saving(function (Absence $absence) {
@@ -39,12 +43,6 @@ class Absence extends Model
                     $absence->estimated_end_date->setTime(0, 0, 0);
                 }
             }
-        });
-
-        static::created(function (Absence $absence) {
-            $user = $absence->person->user;
-
-            $user->notify(new AbsenceCreated($absence));
         });
     }
 
@@ -130,6 +128,21 @@ class Absence extends Model
         return $user->isAbsenceManager();
     }
 
+    public function managers(): Collection
+    {
+        $roleManagers = User::getAbsenceManagers();
+
+        /*if ($this->manager_id) {
+            $manager = User::find($this->manager_id);
+
+            if ($manager && ! $roleManagers->contains($manager->id)) {
+                $roleManagers->push($manager);
+            }
+        }*/
+
+        return $roleManagers;
+    }
+
     /**
      * Relationships
      */
@@ -186,11 +199,15 @@ class Absence extends Model
         $this->approved_by = auth()->user()->id;
         $this->approved_at = now();
         $this->save();
+
+        event(new AbsenceStatusUpdatedEvent($this));
     }
 
     public function deny(): void
     {
         $this->status = AbsenceStatus::Denied->value;
         $this->save();
+
+        event(new AbsenceStatusUpdatedEvent($this));
     }
 }

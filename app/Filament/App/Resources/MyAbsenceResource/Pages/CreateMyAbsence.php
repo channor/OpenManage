@@ -3,8 +3,9 @@
 namespace App\Filament\App\Resources\MyAbsenceResource\Pages;
 
 use App\Enums\AbsenceStatus;
+use App\Events\AbsenceRequestedEvent;
 use App\Filament\App\Resources\MyAbsenceResource;
-use Filament\Actions;
+use App\Models\MyAbsence;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateMyAbsence extends CreateRecord
@@ -26,4 +27,12 @@ class CreateMyAbsence extends CreateRecord
 
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        if($this->record instanceof MyAbsence) {
+            event(new AbsenceRequestedEvent($this->record));
+        }
+    }
+
 }
