@@ -1,23 +1,15 @@
 # OpenManage
 
-**OpenManage** is an open-source management application for companies, quickly developed with [Laravel](https://laravel.com/) and [Filament](https://filamentphp.com/). It provides tools for managing employees, contacts and absences, with more features planned in the future.
+**OpenManage** aims to provides tools for managing employees, contacts and absences, with more features planned in the future.
 
 ---
 
 ## Features
 
-- **Employee Management**: Create and manage employee profiles as a part of Person model.
-- **Absence Tracking**: Record and track vacations, sick leaves, and other absences.
-- **People Management**: Centralize and maintain company contacts.
-
----
-
-## PLANNED / TODO
-
-- [ ] Add inactivity at date column and logic to users.
-- [ ] Welcome email new users.
-- [ ] Create new user option with roles selection when creating person.
-- [ ] Add logic for absences where type `has_hours = true`.
+- **Person Management** 🟢 Developed: Handles common data of people a company interacts with, including customer contacts and employees. Basic functionality developed. More enhancements planned.
+- **Employment Management** 🟡 Proposed: Related to persons with the `employee` type. To be developed, not yet brainstormed or planned out.
+- **Absence Management** 🟢 Developed (Improvements Ongoing): Manages and tracks employee absences, allowing employees to request specific absence types.
+- **Procedures** 🟡 Proposed: Implements procedures and routines within the company. Not yet planned out.
 
 ---
 
@@ -29,13 +21,18 @@
 4. Set app key `php artisan key:generate`
 5. Edit database settings in .env.
 6. `php artisan migrate`
-7. Create your first user with `php artisan make:filament-user`
+7. `php artisan db:seed`
+8. Create your first user with `php artisan make:filament-user`
+9. Follow the setup after installation.
 
 ---
 
 ## Setup
 
+### Absence
 
+1. Setup various absence types.
+2. Set the default names for holidays and own sick leaves in Absence setting.
 
 ---
 
