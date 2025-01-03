@@ -10,10 +10,12 @@ use App\Models\Absence;
 use App\Models\AbsenceType;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class AbsenceResource extends Resource
 {
@@ -130,6 +132,7 @@ class AbsenceResource extends Resource
                     ->label('Employee')
                     ->translateLabel()
                     ->numeric()
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('absenceType.name')
                     ->label('Type')
@@ -220,10 +223,35 @@ class AbsenceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('absence_type_id')
+                    ->label('Type')
+                    ->translateLabel()
+                    ->relationship('absenceType', 'name'),
+
+                Tables\Filters\SelectFilter::make('absence_category')
+                    ->label('Category')
+                    ->options(
+                        collect(AbsenceCategory::cases())->mapWithKeys(
+                            fn ($case) => [$case->value => Str::headline($case->value)]
+                        )
+                    )
+                    ->query(function (Builder $query, array $data) {
+                        if (! isset($data['value']) || blank($data['value'])) {
+                            return $query;
+                        }
+
+                        $value = $data['value'];
+
+                        return $query->whereHas('absenceType', function (Builder $q) use ($value) {
+                            $q->where('category', $value);
+                        });
+                    }),
+
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
                     ->translateLabel()
                     ->options(AbsenceStatus::class),
+
                 Tables\Filters\Filter::make('date_range')
                     ->label('Date Range')
                     ->form([
@@ -245,11 +273,47 @@ class AbsenceResource extends Resource
                             $query->whereDate('start_date', '<=', $date)
                             );
                     }),
+
                 Tables\Filters\TrashedFilter::make('Trashed')->label('Trashed')->translateLabel()
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton(),
+
+                Tables\Actions\EditAction::make()->iconButton(),
+
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->iconButton()
+                    ->icon('heroicon-s-hand-thumb-up')
+                    ->color('success')
+                    ->disabled(fn (Absence $record): bool => $record->status === AbsenceStatus::Approved)
+                    ->action(function (Absence $record) {
+                        $record->approve();
+
+//                        event(new AbsenceStatusUpdated($record));
+
+                        Notification::make()
+                            ->title('Absence request approved')
+                            ->success()
+                            ->send();
+                    }),
+
+                Tables\Actions\Action::make('deny')
+                    ->label('Deny')
+                    ->iconButton()
+                    ->icon('heroicon-s-hand-thumb-down')
+                    ->color('danger')
+                    ->disabled(fn (Absence $record): bool => $record->status === AbsenceStatus::Denied)
+                    ->action(function (Absence $record) {
+                        $record->deny();
+
+//                        event(new AbsenceStatusUpdated($record));
+
+                        Notification::make()
+                            ->title('Absence request denied')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

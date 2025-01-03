@@ -179,4 +179,18 @@ class Absence extends Model
 
         return $recipients;
     }
+
+    public function approve(): void
+    {
+        $this->status = AbsenceStatus::Approved->value;
+        $this->approved_by = auth()->user()->id;
+        $this->approved_at = now();
+        $this->save();
+    }
+
+    public function deny(): void
+    {
+        $this->status = AbsenceStatus::Denied->value;
+        $this->save();
+    }
 }
