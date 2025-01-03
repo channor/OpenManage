@@ -7,6 +7,7 @@ use App\Enums\PersonType;
 use App\Enums\UserRole;
 use App\Events\AbsenceStatusUpdatedEvent;
 use App\Notifications\AbsenceCreated;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,8 +20,12 @@ use Illuminate\Support\Facades\Log;
  *
  * @method static \Illuminate\Database\Eloquent\Builder byPerson()
  *
- * @property mixed $person_id
+ * @property int $person_id
  * @property Person $person
+ * @property AbsenceType $absenceType
+ * @property Carbon $start_date
+ * @property Carbon $end_date
+ * @property Carbon $estimated_end_date
  */
 class Absence extends Model
 {

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property mixed $name
  * @property mixed $id
+ * @property mixed $has_hours
  */
 class AbsenceType extends Model
 {

@@ -2,14 +2,17 @@
 
 namespace App\Filament\App\Resources;
 
+use App\Enums\AbsenceCategory;
 use App\Enums\AbsenceStatus;
 use App\Filament\App\Resources\MyAbsenceResource\Pages;
 use App\Filament\App\Resources\MyAbsenceResource\RelationManagers;
-use App\Models\Absence;
 use App\Models\AbsenceType;
 use App\Models\MyAbsence;
+use Faker\Provider\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Tables;
@@ -119,6 +122,107 @@ class MyAbsenceResource extends Resource
                     ->authorize('delete', MyAbsence::class)
             ])
             ->defaultSort('start_date', 'desc');
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                // 1) High-level overview section
+                Components\Section::make(__('Absence Overview'))
+                    ->description(__('A quick summary of this absence request.'))
+                    ->columns(2)
+                    ->schema([
+                        Components\TextEntry::make('absenceType.name')
+                            ->label(__('Absence Type'))
+                            ->icon(fn (MyAbsence $record) => $record->absenceType->icon ?? null)
+                            ->iconColor(fn (MyAbsence $record) =>
+                            $record->absenceType->color ? Color::hex($record->absenceType->color) : null
+                            ),
+                        Components\TextEntry::make('status')
+                            ->label(__('Status'))
+                            ->badge(),
+                    ]),
+
+                // 2) Dates section
+                Components\Section::make(__('Dates'))
+                    ->columns(3)
+                    ->schema([
+                        Components\TextEntry::make('start_date')
+                            ->label(__('Start Date'))
+                            ->formatStateUsing(fn (MyAbsence $record) =>
+                            $record->absenceType->has_hours
+                                ? $record->start_date?->format('Y-m-d H:i')
+                                : $record->start_date?->format('Y-m-d')
+                            ),
+
+                        Components\TextEntry::make('end_date')
+                            ->label(__('End Date'))
+                            ->formatStateUsing(fn (MyAbsence $record) =>
+                            $record->absenceType->has_hours
+                                ? $record->end_date?->format('Y-m-d H:i')
+                                : $record->end_date?->format('Y-m-d')
+                            ),
+
+                        Components\TextEntry::make('estimated_end_date')
+                            ->label(__('Estimated End Date'))
+                            ->formatStateUsing(fn (MyAbsence $record) =>
+                            $record->absenceType->has_hours
+                                ? $record->estimated_end_date?->format('Y-m-d H:i')
+                                : $record->estimated_end_date?->format('Y-m-d')
+                            )
+                            // Only show if no end date but an estimated date is set:
+                            ->visible(fn (MyAbsence $record) =>
+                                empty($record->end_date) && $record->estimated_end_date
+                            ),
+                    ]),
+
+                // 3) Additional details
+                Components\Section::make(__('Details'))
+                    ->columns(1)
+                    ->schema([
+                        Components\TextEntry::make('note')
+                            ->label(__('Note')),
+
+                        // Only show these if category == SICK_LEAVES
+                        Components\Fieldset::make(__('Sick Leave Details'))
+                            ->schema([
+                                Components\IconEntry::make('is_medically_certified')
+                                    ->boolean()
+                                    ->label(__('Medically Certified?'))
+                                    ->trueIcon('heroicon-s-check-circle')
+                                    ->falseIcon('heroicon-s-x-circle'),
+
+                                Components\IconEntry::make('occupational')
+                                    ->boolean()
+                                    ->label(__('Work-related?'))
+                                    ->trueIcon('heroicon-s-check-circle')
+                                    ->falseIcon('heroicon-s-x-circle'),
+                            ])
+                            ->visible(fn (MyAbsence $record) =>
+                                $record->absenceType->category === AbsenceCategory::SICK_LEAVES
+                            )
+                            ->columns(2),
+                    ]),
+
+                // 4) Meta information (created/updated)
+                Components\Section::make(__('Meta'))
+                    ->collapsible()
+                    ->collapsed()
+                    ->description(__('Technical info about this absence record.'))
+                    ->columns(2)
+                    ->schema([
+                        Components\TextEntry::make('created_at')
+                            ->label(__('Created At'))
+                            ->dateTime()
+                            ->inlineLabel(),
+
+                        Components\TextEntry::make('updated_at')
+                            ->label(__('Updated At'))
+                            ->dateTime()
+                            ->inlineLabel(),
+                    ]),
+            ]);
     }
 
     public static function getRelations(): array
