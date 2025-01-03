@@ -8,7 +8,8 @@ use App\Filament\App\Resources\MyAbsenceResource\Pages;
 use App\Filament\App\Resources\MyAbsenceResource\RelationManagers;
 use App\Models\AbsenceType;
 use App\Models\MyAbsence;
-use Faker\Provider\Text;
+use App\Settings\LocaleSettings;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components;
@@ -126,6 +127,9 @@ class MyAbsenceResource extends Resource
 
     public static function infolist(Infolist $infolist): Infolist
     {
+        // Fetch your Spatie settings class
+        $settings = app(\App\Settings\LocaleSettings::class);
+
         return $infolist
             ->schema([
                 // 1) High-level overview section
@@ -144,33 +148,52 @@ class MyAbsenceResource extends Resource
                             ->badge(),
                     ]),
 
-                // 2) Dates section
                 Components\Section::make(__('Dates'))
                     ->columns(3)
                     ->schema([
                         Components\TextEntry::make('start_date')
                             ->label(__('Start Date'))
-                            ->formatStateUsing(fn (MyAbsence $record) =>
-                            $record->absenceType->has_hours
-                                ? $record->start_date?->format('Y-m-d H:i')
-                                : $record->start_date?->format('Y-m-d')
-                            ),
+                            ->formatStateUsing(function (MyAbsence $record) use ($settings) {
+                                // If absence tracks hours, use date+time format from settings
+                                if ($record->absenceType->has_hours) {
+                                    $format = $settings->getDateTimeFormatWithClock();
+                                } else {
+                                    // Otherwise, just the date format
+                                    $format = $settings->default_date_format;
+                                }
+
+                                return $record->start_date
+                                    ? $record->start_date->format($format)
+                                    : null;
+                            }),
 
                         Components\TextEntry::make('end_date')
                             ->label(__('End Date'))
-                            ->formatStateUsing(fn (MyAbsence $record) =>
-                            $record->absenceType->has_hours
-                                ? $record->end_date?->format('Y-m-d H:i')
-                                : $record->end_date?->format('Y-m-d')
-                            ),
+                            ->formatStateUsing(function (MyAbsence $record) use ($settings) {
+                                if ($record->absenceType->has_hours) {
+                                    $format = $settings->getDateTimeFormatWithClock();
+                                } else {
+                                    $format = $settings->default_date_format;
+                                }
+
+                                return $record->end_date
+                                    ? $record->end_date->format($format)
+                                    : null;
+                            }),
 
                         Components\TextEntry::make('estimated_end_date')
                             ->label(__('Estimated End Date'))
-                            ->formatStateUsing(fn (MyAbsence $record) =>
-                            $record->absenceType->has_hours
-                                ? $record->estimated_end_date?->format('Y-m-d H:i')
-                                : $record->estimated_end_date?->format('Y-m-d')
-                            )
+                            ->formatStateUsing(function (MyAbsence $record) use ($settings) {
+                                if ($record->absenceType->has_hours) {
+                                    $format = $settings->getDateTimeFormatWithClock();
+                                } else {
+                                    $format = $settings->default_date_format;
+                                }
+
+                                return $record->estimated_end_date
+                                    ? $record->estimated_end_date->format($format)
+                                    : null;
+                            })
                             // Only show if no end date but an estimated date is set:
                             ->visible(fn (MyAbsence $record) =>
                                 empty($record->end_date) && $record->estimated_end_date
@@ -214,12 +237,12 @@ class MyAbsenceResource extends Resource
                     ->schema([
                         Components\TextEntry::make('created_at')
                             ->label(__('Created At'))
-                            ->dateTime()
+                            ->formatStateUsing(fn (Carbon $state) => $state->format(app(LocaleSettings::class)->getDateTimeFormatWithClock()))
                             ->inlineLabel(),
 
                         Components\TextEntry::make('updated_at')
                             ->label(__('Updated At'))
-                            ->dateTime()
+                            ->formatStateUsing(fn (Carbon $state) => $state->format(app(LocaleSettings::class)->getDateTimeFormatWithClock()))
                             ->inlineLabel(),
                     ]),
             ]);
